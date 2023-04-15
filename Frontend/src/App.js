@@ -1,21 +1,45 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Messagebox from './components/Messagebox.js';
-import io from 'socket.io-client'
+//import { socket } from './socket.js';
+import io from 'socket.io-client';
+//import { useEffect } from 'react';
 
 function App() {
 
-  const socket = io.connect("ws://localhost:4000")
+  /*const [socket, setSocket] = useState(io.connect('http://localhost:4000'))
+  useEffect(() => {
+      const newSocket = io.connect('http://localhost:4000');
+      setSocket(newSocket);
+    
+      return ()=>{newSocket.disconnect();}
+    }, [])*/
+
+  const socket = io.connect('http://localhost:4000');
+
+
   const [messagelist,addmessage]=useState([]);
 var inputvalue;
+
   const sendmessage=()=>{
     socket.emit('send-message',inputvalue);
     console.log("The message has been sent from frontend");
   }
-  socket.on("recieve-message",(message)=>{
-    console.log("The message has been Received by frontend");
-    addmessage((prevmessages)=>{
-      return [...prevmessages,<Messagebox message={message}/>]});
-  })
+
+  useEffect(() => {
+    // Add event listener for "recieve-message" event
+    const handleReceiveMessage = (message) => {
+      console.log("The message has been Received by frontend");
+      addmessage(prevMessages => [...prevMessages, <Messagebox message={message} />]);
+    }
+    socket.on("recieve-message", handleReceiveMessage);
+
+    // Cleanup function
+    return () => {
+      // Remove event listener when component unmounts
+      socket.off("recieve-message", handleReceiveMessage);
+    };
+  }, []);
+  
 
   const inputchanged = (data) =>{
     inputvalue=data.target.value;

@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
-const ser =app.listen(4000);
+const ser = app.listen(4000);
 
 const io = require("socket.io")(ser, {
     cors: {
@@ -13,7 +13,7 @@ const io = require("socket.io")(ser, {
 io.on('connection', (socket) => {
     console.log('A User Connected');
     socket.on('send-message', (message) => {
-        socket.broadcast.emit('recieve-message', message);
+        io.emit('recieve-message', message);
     })
 })
 
